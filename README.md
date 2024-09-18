@@ -64,12 +64,6 @@ You may need to install `unrar` and `unzip` for the code to work correctly.
 
 If you do not care about classes, the class folders are not necessary and the dataset file structure can be collapsed into `train` and `test` directories of just videos.
 
-## Using Pretrained VQ-VAEs
-There are four available pre-trained VQ-VAE models. All strides listed with each model are downsampling amounts across THW for the encoders.
-* `bair_stride4x2x2`: trained on 16 frame 64 x 64 videos from the BAIR Robot Pushing dataset
-* `ucf101_stride4x4x4`: trained on 16 frame 128 x 128 videos from UCF-101
-* `kinetics_stride4x4x4`: trained on 16 frame 128 x 128 videos from Kinetics-600
-* `kinetics_stride2x4x4`: trained on 16 frame 128 x 128 videos from Kinetics-600, with 2x larger temporal latent codes (achieves slightly better reconstruction)
 ```python
 from torchvision.io import read_video
 from videogpt import load_vqvae
@@ -109,16 +103,10 @@ Use the `scripts/train_vqvae.py` script to train a VQ-VAE. Execute `python scrip
 * `--resolution 128`: spatial resolution to train on 
 * `--sequence_length 16`: temporal resolution, or video clip length
 
-## Using Pretrained VideoGPTs
-There are two available pre-trained VideoGPT models
-* `bair_gpt`: single frame-conditional BAIR model using discrete encodings from `bair_stride4x2x2` VQ-VAE
-* `ucf101_uncond_gpt`: unconditional UCF101 model using discrete encodings from `ucf101_stride4x4x4` VQ-VAE
-Note that both pre-trained models use sparse attention. For purposes of fine-tuning, you will need to install sparse attention, however, sampling does not required sparse attention to be installed.
-
 ## Training VideoGPT
-You can download a pretrained VQ-VAE, or train your own. Afterwards, use the `scripts/train_videogpt.py` script to train an VideoGPT model for sampling. Execute `python scripts/train_videogpt.py -h` for information on all available training settings. A subset of more relevant settings are listed below, along with default values.
+Use the `scripts/train_videogpt.py` script to train an VideoGPT model for sampling. Execute `python scripts/train_videogpt.py -h` for information on all available training settings. A subset of more relevant settings are listed below, along with default values.
 ### VideoGPT Specific Settings
-* `--vqvae kinetics_stride4x4x4`: path to a vqvae checkpoint file, OR a pretrained model name to download. Available pretrained models are: `bair_stride4x2x2`, `ucf101_stride4x4x4`, `kinetics_stride4x4x4`, `kinetics_stride2x4x4`. BAIR was trained on 64 x 64 videos, and the rest on 128 x 128 videos
+* `--vqvae kinetics_stride4x4x4`: path to a vqvae checkpoint file
 * `--n_cond_frames 0`: number of frames to condition on. `0` represents a non-frame conditioned model
 * `--class_cond`: trains a class conditional model if activated
 * `--hidden_dim 576`: number of transformer hidden features
@@ -141,7 +129,7 @@ You can download a pretrained VQ-VAE, or train your own. Afterwards, use the `sc
 * `--sequence_length 16`: temporal resolution, or video clip length
 
 ## Sampling VideoGPT
-VideoGPT models can be sampled using the `scripts/sample_videogpt.py`. You can specify a path to a checkpoint during training, or the name of a pretrained model. You may need to install `ffmpeg`: `sudo apt-get install ffmpeg`
+VideoGPT models can be sampled using the `scripts/sample_videogpt.py`. You can specify a path to a checkpoint during training. You may need to install `ffmpeg`: `sudo apt-get install ffmpeg`
 
 ## Evaluation
 Evaluation is done primarily using [Frechet Video Distance (FVD)](https://arxiv.org/abs/1812.01717) for BAIR and Kinetics, and [Inception Score](https://arxiv.org/abs/1606.03498) for UCF-101. Inception Score can be computed by generating samples and using the code from the [TGANv2 repo](https://github.com/pfnet-research/tgan2). FVD can be computed through `python scripts/compute_fvd.py`, which runs a PyTorch-ported version of the [original codebase](https://github.com/google-research/google-research/tree/master/frechet_video_distance)
